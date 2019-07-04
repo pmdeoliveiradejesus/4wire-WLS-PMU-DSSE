@@ -250,8 +250,8 @@ xaxis = xlabel({'Number of state variables'}, 'FontSize', 24);
 set(xaxis,'Interpreter','latex');
 yaxis = ylabel({'Average factorization time (ms)'}, 'FontSize', 24);
 set(yaxis,'Interpreter','latex');
-leg = legend({'mean time for error ${\epsilon}=3 \%$';'mean time for error ${\epsilon}=6 \%$';'mean time for error ${\epsilon}=9 \%$'...
-    ;'mean time for error ${\epsilon}=12 \%$'}, 'FontSize', 24, 'Location','southeast');
+leg = legend({'mean time for error ${\epsilon}=1 \%$';'mean time for error ${\epsilon}=2 \%$';'mean time for error ${\epsilon}=3 \%$'...
+    ;'mean time for error ${\epsilon}=4 \%$'}, 'FontSize', 24, 'Location','southeast');
 set(leg,'Interpreter','latex');
 legend boxoff 
 
@@ -265,8 +265,8 @@ xaxis = xlabel({'Number of state variables'}, 'FontSize', 24);
 set(xaxis,'Interpreter','latex');
 yaxis = ylabel({'Number of iterations to converge e=10-4'}, 'FontSize', 24);
 set(yaxis,'Interpreter','latex');
-leg = legend({'Number of iterations for error ${\epsilon}=3 \%$';'Number of iterations for error ${\epsilon}=6 \%$';'Number of iterations for error ${\epsilon}=9 \%$'...
-    ;'Number of iterations for error ${\epsilon}=12 \%$'}, 'FontSize', 24, 'Location','southeast');
+leg = legend({'Number of iterations for error ${\epsilon}=1 \%$';'Number of iterations for error ${\epsilon}=2 \%$';'Number of iterations for error ${\epsilon}=3 \%$'...
+    ;'Number of iterations for error ${\epsilon}=4 \%$'}, 'FontSize', 24, 'Location','southeast');
 set(leg,'Interpreter','latex');
 
 figure('Color','w','units','normalized','outerposition',[0 0 1 1],'name','meanConvTime',...
@@ -279,8 +279,8 @@ xaxis = xlabel({'Number of state variables'}, 'FontSize', 24);
 set(xaxis,'Interpreter','latex');
 yaxis = ylabel({'meanConvTime (seconds)'}, 'FontSize', 24);
 set(yaxis,'Interpreter','latex');
-leg = legend({'mean time for error ${\epsilon}=3 \%$';'mean time for error ${\epsilon}=6 \%$';'mean time for error ${\epsilon}=9 \%$'...
-    ;'mean time for error ${\epsilon}=12 \%$'}, 'FontSize', 24, 'Location','southeast');
+leg = legend({'mean time for error ${\epsilon}=1 \%$';'mean time for error ${\epsilon}=2 \%$';'mean time for error ${\epsilon}=2 \%$'...
+    ;'mean time for error ${\epsilon}=4 \%$'}, 'FontSize', 24, 'Location','southeast');
 set(leg,'Interpreter','latex');
 legend boxoff 
 
@@ -296,8 +296,8 @@ xaxis = xlabel({'Number of state variables'}, 'FontSize', 24);
 set(xaxis,'Interpreter','latex');
 yaxis = ylabel({'Avg. ctive Losses (kW)'}, 'FontSize', 24);
 set(yaxis,'Interpreter','latex');
-leg = legend({'mean time for error ${\epsilon}=3 \%$';'mean time for error ${\epsilon}=6 \%$';'mean time for error ${\epsilon}=9 \%$'...
-    ;'mean time for error ${\epsilon}=12 \%$';'Actual Active Losses',}, 'FontSize', 24, 'Location','northeast');
+leg = legend({'mean time for error ${\epsilon}=1 \%$';'mean time for error ${\epsilon}=2 \%$';'mean time for error ${\epsilon}=3 \%$'...
+    ;'mean time for error ${\epsilon}=4 \%$';'Actual Active Losses',}, 'FontSize', 24, 'Location','northeast');
 set(leg,'Interpreter','latex');
 legend boxoff 
 
