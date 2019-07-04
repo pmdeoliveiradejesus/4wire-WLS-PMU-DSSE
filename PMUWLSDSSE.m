@@ -11,9 +11,14 @@ disp('pm.deoliveiradejes@uniandes.edu.co')
 disp('V.1.0 July 3, 2019')
 disp('-------------------')   
 %% General parameters
-layer=7;%number of layers
+layer=4;%number of layers
 nl=.03;%number of nodes
 econv=10^-4; %convergence criteria
+%% To get Paper Resuls set basecase=1
+basecase=0;%load paper 2 bus case
+if basecase==1
+    layer=1;
+end
 %% Runs the  4-wire Power Flow for each layer
 [zm,LossesPm,LossesQm,Ym,Ynewm,rm,injectm,vm,SLm]=KerstingGeneric_powerflow(layer);
 zx{layer}=num2cell(zm);
@@ -47,11 +52,13 @@ for j=1:m
         zalt(j,1)=z0(j,1)*(1+nl*unifrnd(lowerbound,upperbound)); 
        %zalt(j,1)=z0(j,1)*(1+nl*normrnd(lowerbound,upperbound));         
 end
+if basecase==1
 % Only for l=1 and nl=3% - Paper example
-%   zalt=[5.1314 1.7118 -6.7317 4.9580 1.2121 ...
-%   -6.5772 4.8440 -6.7463 1.9211 4.5764 -6.5365 2.0370 0.4369 -0.0697...
-%   -0.2310 -0.1008 -0.4422 0.0707 0.2423 0.1004 0.1360 -0.4979...
-%   0.2638 0.1044 -0.1320 0.5211 -0.2622 -0.1054 4.9499]'; 
+   zalt=[5.1314 1.7118 -6.7317 4.9580 1.2121 ...
+   -6.5772 4.8440 -6.7463 1.9211 4.5764 -6.5365 2.0370 0.4369 -0.0697...
+   -0.2310 -0.1008 -0.4422 0.0707 0.2423 0.1004 0.1360 -0.4979...
+   0.2638 0.1044 -0.1320 0.5211 -0.2622 -0.1054 4.9499]';
+end
 %% Meter data accuracy and weights calculation
 sigma0=.03;%acuraccy of the meters
 SIGMAv0=sigma0*10; %Accuracy (dev stad 1*sigma0% on a scale 10000V)
