@@ -4,28 +4,28 @@ clear all
 close all
 clc
 disp('-------------------')
-disp('Advanced 4-wire DSSE')
+disp('Advanced 4-wire PMU-WLS-DSSE')
 disp('Generalized m layer 2^n node 4wire distribution test system')
 disp('Paulo De Oliveira, Nestor Rodriguez, David Celeita, Gustavo Ramos')
 disp('pm.deoliveiradejes@uniandes.edu.co')
 disp('V.1.0 July 3, 2019')
 disp('-------------------')   
 %% General parameters
-layer=4;%number of layers
-nl=.03;%number of nodes
-econv=10^-4; %convergence criteria
+layer=7;%number of layers
+nl=.03;%noise level
+econv=10^-5; %convergence criteria
 %% To get Paper Resuls set basecase=1
-basecase=0;%load paper 2 bus case
+basecase=0;%load IEEE paper case
 if basecase==1
     layer=1;
 end
 %% Runs the  4-wire Power Flow for each layer
-[zm,LossesPm,LossesQm,Ym,Ynewm,rm,injectm,vm,SLm]=KerstingGeneric_powerflow(layer);
+[zm,LossesPm,Ym,Ynewm,Ynew2m,rm,injectm,vm,SLm]=KerstingGeneric_powerflow(layer);
 zx{layer}=num2cell(zm);
 LossesPmx{layer}=num2cell(LossesPm);
-LossesQmx{layer}=num2cell(LossesQm);
 Ymx{layer}=num2cell(Ym);
 Ynewx{layer}=num2cell(Ynewm);
+Ynew2x{layer}=num2cell(Ynew2m);
 rx{layer}=num2cell(rm);
 injectmx{layer}=num2cell(injectm);
 vmx{layer}=num2cell(vm);
@@ -35,9 +35,9 @@ SLmx{layer}=num2cell(SLm);
 nb=2^layer;
 z0=cell2mat(zx{layer});
 LossesP=cell2mat(LossesPmx{layer});
-LossesQ=cell2mat(LossesQmx{layer});
 Y=cell2mat(Ymx{layer});
 Ynew=cell2mat(Ynewx{layer});
+Ynew2=cell2mat(Ynew2x{layer});
 r=cell2mat(rx{layer});
 inject=cell2mat(injectmx{layer});
 v=cell2mat(vmx{layer});
@@ -54,10 +54,12 @@ for j=1:m
 end
 if basecase==1
 % Only for l=1 and nl=3% - Paper example
-   zalt=[5.1314 1.7118 -6.7317 4.9580 1.2121 ...
-   -6.5772 4.8440 -6.7463 1.9211 4.5764 -6.5365 2.0370 0.4369 -0.0697...
-   -0.2310 -0.1008 -0.4422 0.0707 0.2423 0.1004 0.1360 -0.4979...
-   0.2638 0.1044 -0.1320 0.5211 -0.2622 -0.1054 4.9499]';
+   zalt=[5.13685271701070;1.71619517122123;-6.73743427864737;4.99451346817954;1.24238044981855;-6.72906146331143;4.99988680620950;-6.6900866719488;1.86374451728886;4.67983140587769;-6.90885103136665;1.92974574908040;0.430833963684793;-0.0702232038049941;-0.233552074214137;-0.100686290465729;-0.439101497362902;0.0692593051264286;0.230127146593019;0.0979942874546346;0.139171102396880;-0.513222174262098;0.263484226235493;0.107544229788664;-0.133781221303544;0.509903503818708;-0.273085400259189;-0.108938112961564;4.94990000000000;-0.100686290465729;0.0979942874546346;0.107544229788664;-0.108938112961564];
+end
+kk=0;
+for k=4:4:8*nb
+    kk=kk+1;
+zalt(m+kk)=zalt(6*nb+k);
 end
 %% Meter data accuracy and weights calculation
 sigma0=.03;%acuraccy of the meters
@@ -72,6 +74,9 @@ SigI=horzcat(ones(1,3)*SIGMAi0^-2,ones(1,1)*SIGMAin0^-2, ones(1,3)*SIGMAi0^-2,on
 end
 SigZ=ones(1,nb-1)*SIGMAz0^-2;
 We=horzcat(SigV,SigI,SigZ);
+for k=1:2*nb
+We(m+k)=SIGMAin0^-2;
+end
 W=diag(We);
 WL=horzcat(SigV,SigI,SigZ)';
 %% Build h(x) and H(x) matrix (Outside de while loop, only constant parameters
@@ -88,19 +93,19 @@ end
 M2=cell2mat(M);
 [m2c,m2w]=size(M2);
 %Jacobian precalculation
-H=zeros(m,ustat);
-H=vertcat(M2,Ynew);
-j=1;
-for k=m-nb+2:m;
-H(k,length(v)+j)=1;
-j=j+1;
-end
+H=zeros(m+2*nb,ustat);
+Yone=zeros(nb-1,nb*8);
+H=vertcat(M2,Ynew,Yone,Ynew2);
+jj=0;
+for k=m-nb+2:m
+  jj=jj+1;
+  H(k,length(v)+jj)=1;
+ end
 e=1;iteration=1;
 %% 4-Wire Distrinution System State Estimation Procedure
 while e>econv   
 % calculate h(x) Non linear elements
 h1=M2*v;
-kk1=0;
 h2=Ynew*v;
 kk=0;
 for  k=8:4:4*nb
@@ -109,7 +114,8 @@ h2(k)=h2(k)-inv(r(kk))*v(k,1);
 h2(k+4*nb)=h2(k+4*nb)-inv(r(kk))*v(k+4*nb,1);
 end
 h3=eye(nb-1)*r;
-h=[h1',h2',h3']';
+h4=Ynew2*v;
+h=[h1',h2',h3',h4']';
 %% Update the Jacobian with non-linear elements
 j1=0;
  for k=m2c+8:4:m2c+nb*4
@@ -131,7 +137,6 @@ j1=0;
   j4=j4+1;    
    H(k4,8*nb+j4)=v(k4-m2c,1)*(r(j4))^(-2);
   end
-%[mn]=length(Y)+length(r);
 %% Two matrices!
  Bs=H'*diag(We);
  Gs=Bs*H;
@@ -164,7 +169,7 @@ flag=0;
  end
   time(iteration)=cputime-time0;
 % time3=cputime;
-% dx=-inv(H'*W*H)*H'*W*(zalt-h); Direct without Cholesky
+% dx=-inv(H'*W*H)*H'*W*(zalt-h); %Direct without Cholesky
 % time4(iter)=cputime-time3
 x=vertcat(v,r);
 x=x-dx;
@@ -177,28 +182,36 @@ end
 iteration=iteration+1;
 e=max(abs(dx));
 %% End of the DSSE
-end 
-% Estimated losses
-for k=1:4*nb;
-vc(k,1)=complex(v(k),v(k+4*nb)) ;  
 end
-ic1=0;ic2=0;ic3=0;ic4=0;
-for k=1:4:4*nb-4
-ic1=conj(-SL(1)/(vc(k+4,1)-vc(k+7,1)))+ic1;
-ic2=conj(-SL(2)/(vc(k+5,1)-vc(k+7,1)))+ic2;
-ic3=conj(-SL(3)/(vc(k+6,1)-vc(k+7,1)))+ic3;
-ic4=0+ic4;
-end
-SG=vc(1,1)*conj(ic1)+vc(2,1)*conj(ic2)+vc(3,1)*conj(ic3);
-LossesPe=real(SG+(nb-1)*sum(SL))*1000;%Estimated losses
-%LossesQe(iii,layer,kkk)=imag(SG+(nb-1)*sum(SL))*1000;
+%% Key performance indexes
 InverseTime=mean(time)% Gain matrix factorization time
 ConvergenceTime=sum(time)% Gain matrix factorization time
 IterNumber=iteration%number of iteration to reach convergence
 J=(zalt-h)'*W*(zalt-h) %Residual
 Confidence=J-chi2inv(.01,m-ustat);
 pValue =1-chi2cdf(J,m-ustat)%Confidence level >.99% not suspicious bad data
-LossesP;%Actual losses
-%plot the state
-plot(abs(vc))
-
+% Estimated active power losses
+for k=1:4*nb;
+vc(k,1)=complex(v(k),v(k+4*nb)) ;  
+end
+for k=1:8*nb
+ij(k,1)=h(k+6*nb);  
+end
+for k=1:4*nb
+ijc(k,1)=complex(ij(k),ij(k+4*nb)) ;  
+end
+P=real(vc).*real(ijc)+imag(vc).*imag(ijc);
+LossesPe=sum(P);
+%% Verify i=[Y].v and i=^[Y*].v
+sum(ij-Ym*v)
+kk=0;
+for k=8:4:4*nb
+    kk=kk+1;
+Ynew(k,k)=Ynew(k,k)-inv(r(kk));
+end
+kk=0;
+for k=4*nb+8:4:8*nb
+        kk=kk+1;
+Ynew(k,k)=Ynew(k,k)-inv(r(kk));
+end
+sum(ij-Ynew*v)

@@ -1,4 +1,10 @@
-function [z0,LossesP,LossesQ,Y,Ynew,r,inject,v,SL] = run_powerflow(l)
+function [z0,LossesP,Y,Ynew,Ynew2,r,inject,v,SL] = run_powerflow(l)
+% Test case; Kersting NEV
+% Kersting, W.H. A three-phase unbalanced line model with grounded neutrals
+% through a resistance.  In Proceedings of the  2008 IEEE Power and Energy 
+% Society General Meeting-PESGM, Pittsburgh, PA, USA, 20--24 July 2008; 
+% pp.  12651-12652.
+% Two nodes, distance 1.13miles
 nb=2^l;
 %% Kesting NEV Database - Generic n^l bus power flow
 a=complex(cos(2*pi/3),sin(2*pi/3));
@@ -70,9 +76,6 @@ hqc=29;%feet
 fpa=0.9; Sa=3.0;%power factor, MVA
 fpb=0.95;Sb=3.5;%power factor, MVA
 fpc=0.85;Sc=2.5;%power factor, MVA
-% fpa=0.9; Sa=3.0;%power factor, MVA
-% fpb=0.9;Sb=3.0;%power factor, MVA
-% fpc=0.9;Sc=3.0;%power factor, MVA
 SL(1)=-((Sa*fpa+sqrt(-1)*Sa*(1-fpa^2)^.5)  )/(nb  -1);% MVA
 SL(1+1)=-((Sb*fpb+sqrt(-1)*Sb*(1-fpb^2)^.5) ) /(nb  -1);% MVA
 SL(1+2)=-((Sc*fpc+sqrt(-1)*Sc*(1-fpc^2)^.5)  )/(nb -1);% MVA
@@ -225,25 +228,14 @@ while e>econv
     iter=iter+1;
 end
 %OpenDSS Results
-ic1=0;ic2=0;ic3=0;ic4=0;
-for k=1:4:4*nb-4
-ic1=conj(-SL(1)/(V(k+4,1)-V(k+7,1)))+ic1;
-ic2=conj(-SL(2)/(V(k+5,1)-V(k+7,1)))+ic2;
-ic3=conj(-SL(3)/(V(k+6,1)-V(k+7,1)))+ic3;
-ic4=0+ic4;
-end
-SG1=(V(1,1)-V(4,1))*conj(ic1);
-SG2=(V(2,1)-V(4,1))*conj(ic2);
-SG3=(V(3,1)-V(4,1))*conj(ic3);
-SG=SG1+SG2+SG3;
-LossesP=real(SG+(nb-1)*sum(SL))*1000;
-LossesQ=imag(SG+(nb-1)*sum(SL))*1000;
 %% End of OpenDSS callulation 
 Va=[V(1);V(2);V(3);V(4);];
 Vb=[V(5);V(6);V(7);V(8);];
 I1=Yp*Va-Yp*Vb;
 I=vertcat(I1,I2);
-sum((I-Y*V));
+%sum((I-Y*V)); %verification
+P=real(V).*real(I)+imag(V).*imag(I);
+LossesP=sum(P);
 G=real(Y);B=imag(Y);
 YY=vertcat(horzcat(G,-B),horzcat(B,G));%pu
 II=vertcat(real(I),imag(I));%pu
@@ -271,9 +263,16 @@ Ynew=YY;
 for k=4:4:8*nb
 Ynew(k,:)=-Ynew(k-3,:)- Ynew(k-2,:)-Ynew(k-1,:);
 end
-Ynew(4,4)=Ynew(4,4)-inv(0.5);
+Ynew(4,4)=Ynew(4,4)-inv(resist1);
 Ynew(4+4*nb,4+4*nb)=Ynew(4+4*nb,4+4*nb)-inv(resist1);
 z0=zm;
 inject=II;
 v=VV;
+kk=0;
+for k=4:4:8*nb
+    kk=kk+1;
+Ynew2(kk,:)=YY(k,:);
 end
+end %end OpenDSS powerflow routine
+
+
