@@ -229,7 +229,7 @@ end
 
  for noisel=Nei:Nef
      for layer=1:l
-meanLossesPe(noisel,layer)=mean(LossesPe(noisel,layer,:)); 
+meanLossesPe(noisel,layer)=mean(LossesPe(noisel,layer,:)*1000); 
 %meanLosseseP(noisel,layer)=mean(LosseseP(noisel,layer,:));
 meanInvT(noisel,layer)=mean(InverseTime(noisel,layer,:));
 meanIterT(noisel,layer)=mean(IterTime(noisel,layer,:));
@@ -268,7 +268,7 @@ set(xaxis,'Interpreter','latex');
 yaxis = ylabel({'Number of iterations to converge e=10-4'}, 'FontSize', 24);
 set(yaxis,'Interpreter','latex');
 leg = legend({'Number of iterations for error ${\epsilon}=3 \%$';'Number of iterations for error ${\epsilon}=6 \%$';'Number of iterations for error ${\epsilon}=9 \%$'...
-    ;'Number of iterations for error ${\epsilon}=12 \%$'}, 'FontSize', 24, 'Location','southeast');
+    ;'Number of iterations for error ${\epsilon}=12 \%$'}, 'FontSize', 24, 'Location','northeast');
 set(leg,'Interpreter','latex');
 
 figure('Color','w','units','normalized','outerposition',[0 0 1 1],'name','meanConvTime',...
