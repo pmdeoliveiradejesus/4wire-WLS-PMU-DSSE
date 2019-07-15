@@ -1,4 +1,4 @@
-Distribution System State Sstimation (DSSE) over 4-wire distribution models
+Distribution System State Estimation (DSSE) over 4-wire distribution models
 July 3, 2019
 Paulo M. De Oliveira (pm.deoliveiradejes@uniandes.edu.co)
 N. Rodriguez
