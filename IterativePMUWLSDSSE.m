@@ -1,12 +1,12 @@
 % PMU-based system state estimation for multigrounded distribution systems
-%  mcc -m NewDSSE.m -o DSSE4wireTime
+% To compile this prograM: mcc -m IterativePMUWLSDSSE.m -o IterativePMUWLSDSSE
 clear all
 close all
 clc
 disp('-------------------')
 disp('Advanced 4-wire DSSE')
 disp('Generalized m layer 2^n node 4wire distribution test system')
-disp('Performance Test')
+disp('Performance Test program')
 disp('Paulo De Oliveira, Nestor Rodriguez, David Celeita, Gustavo Ramos')
 disp('pm.deoliveiradejes@uniandes.edu.co')
 disp('V.1.0 July 3, 2019')
@@ -114,7 +114,8 @@ for k=m-nb+2:m
   H(k,length(v)+jj)=1;
  end
 e=1;iteration=1;
-%% 4-Wire Distrinution System State Estimation Procedure
+%% 4-Wire Distrinution System State Estimation Procedure  
+time0=cputime;
 while e>econv   
 % calculate h(x) Non linear elements
 h1=M2*v;
@@ -155,7 +156,7 @@ j1=0;
  Gs=Bs*H;
  isposdef = all(eig(Gs)) > 0;%is Gs positive definite?
  %% Inverse as a function of Bs and Gs
-  time0=cputime;
+
 R = chol(Gs)';%Choelsky decomposition L'*L=Gs
 t=Bs*(h-zalt);
 u(1)=0;%Forward substitution
@@ -180,9 +181,8 @@ flag=0;
   end
  end
  end
-  time(iteration)=cputime-time0;
 % time3=cputime;
-% dx=-inv(H'*W*H)*H'*W*(zalt-h); Direct without Cholesky
+% dx=-inv(H'*W*H)*H'*W*(zalt-h); %Direct
 % time4(iter)=cputime-time3
 x=vertcat(v,r);
 x=x-dx;
@@ -196,7 +196,7 @@ iteration=iteration+1;
 e=max(abs(dx));
 %% End of the DSSE
 end 
-
+  time(iteration)=cputime-time0;
 % Estimated active power losses
 for k=1:4*nb;
 vc(k,1)=complex(v(k),v(k+4*nb)) ;  
@@ -217,7 +217,6 @@ J(noisel,layer,it)=(zalt-h)'*W*(zalt-h);
 % Jhistogram(it)=(zalt-h)'*W*(zalt-h);
 %     end
 % end
-
 %Confidence(noisel,layer,it)=J(noisel,layer,it)-chi2inv(.01,m-ustat);
 pValue(noisel,layer,it)=1-chi2cdf(J(noisel,layer,it),m-ustat);%Confidence level >.99% not suspicious bad data
 nn(layer)=ustat;
@@ -230,7 +229,6 @@ end
  for noisel=Nei:Nef
      for layer=1:l
 meanLossesPe(noisel,layer)=mean(LossesPe(noisel,layer,:)*1000); 
-%meanLosseseP(noisel,layer)=mean(LosseseP(noisel,layer,:));
 meanInvT(noisel,layer)=mean(InverseTime(noisel,layer,:));
 meanIterT(noisel,layer)=mean(IterTime(noisel,layer,:));
 meanResidual(noisel,layer)=mean(J(noisel,layer,:));
@@ -239,7 +237,7 @@ meanpValue(noisel,layer)=mean(pValue(noisel,layer,:));
 meanConvTime(noisel,layer)=meanInvT(noisel,layer)*meanIterT(noisel,layer);
      end
  end
-save Statvars meanInvT meanIterT meanResidual meanLossesPe meanConvTime LssP
+%save Statvars meanInvT meanIterT meanResidual meanLossesPe meanConvTime LssP
 toc
 %% Display Output 
 figure('Color','w','units','normalized','outerposition',[0 0 1 1],'name','Inverse Time',...
@@ -267,7 +265,7 @@ xaxis = xlabel({'Number of state variables'}, 'FontSize', 24);
 set(xaxis,'Interpreter','latex');
 yaxis = ylabel({'Number of iterations to converge e=10-4'}, 'FontSize', 24);
 set(yaxis,'Interpreter','latex');
-leg = legend({'Number of iterations for error ${\epsilon}=3 \%$';'Number of iterations for error ${\epsilon}=6 \%$';'Number of iterations for error ${\epsilon}=9 \%$'...
+leg = legend({'Number of iterations for error ${\epsilon}=3 \%$';'Number of iterations for error $8{\epsilon}=6 \%$';'Number of iterations for error ${\epsilon}=9 \%$'...
     ;'Number of iterations for error ${\epsilon}=12 \%$'}, 'FontSize', 24, 'Location','northeast');
 set(leg,'Interpreter','latex');
 
@@ -303,6 +301,3 @@ leg = legend({'mean time for error ${\epsilon}=3 \%$';'mean time for error ${\ep
 set(leg,'Interpreter','latex');
 legend boxoff 
 
-% figure
-% hist(Jhistogram,100);
-% meanInvT
