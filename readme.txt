@@ -1,3 +1,5 @@
+This repository contains the script required to run a multiphase multingrounded state estimator.
+
 Distribution System State Sstimation (DSSE) over 4-wire distribution models
 July 3, 2019
 Paulo M. De Oliveira (pm.deoliveiradejes@uniandes.edu.co)
