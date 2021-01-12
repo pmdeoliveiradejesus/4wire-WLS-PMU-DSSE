@@ -5,6 +5,8 @@ N. Rodriguez
 D. Celeita
 G. Ramos
 Universidad de los Andes (Colombia)
+published at https://ieeexplore.ieee.org/abstract/document/9170903
+
 --------------------------------------------------------
 PMUWLSDSSE.m run a general n-bus WLS-DSSE model over the Kersting NEV test system [1]
 Excel Worksheet illustrates the method for 2-bus NEV system.
